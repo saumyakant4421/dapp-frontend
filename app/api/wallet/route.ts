@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { wallet: string } }
-) {
+export async function GET(req: Request) {
+  const wallet = req.url ? new URL(req.url).searchParams.get("wallet") : null;
 
-  const { wallet } = params;
+  if (!wallet) {
+    return NextResponse.json({ exists: false }, { status: 400 });
+  }
 
   // TEMP MOCK
   // later this will query database
