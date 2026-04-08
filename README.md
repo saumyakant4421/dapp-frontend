@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# dapp-frontend
+
+A Next.js 16 App Router frontend for a blockchain-enabled campaign platform where:
+- brands create and manage campaigns,
+- influencers onboard with wallet login,
+- campaign payouts are intended to be transparent and verifiable.
+
+## Tech Stack
+
+- Next.js 16 (App Router, Turbopack)
+- React 19 + TypeScript
+- Tailwind CSS 4
+- Wagmi + Viem (wallet connectivity)
+- TanStack Query
+
+## Current App Areas
+
+### Public
+- `/` — Landing page
+- `/campaigns` — Campaign discovery (currently placeholder)
+
+### Brand/Auth + Dashboard
+- `/login`
+- `/verify-company`
+- `/dashboard`
+- `/campaign`
+- `/campaign/create`
+
+### Influencer/Auth + Dashboard
+- `/influencer/login` — Wallet login flow
+- `/influencer/onboard` — Profile setup
+- `/influencer/dashboard`
+
+## API Routes
+
+- `POST /api/company/check` — Verify company from request payload
+- `POST /api/company/submit` — Submit company details
+- `GET /api/wallet?wallet=0x...` — Wallet existence check
+- `POST /api/wallet/bind` — Bind company and wallet
+- `POST /api/influencer/onboard` — Save influencer onboarding data
+
+> Note: Some API handlers are currently mock/in-memory implementations for development.
 
 ## Getting Started
 
-First, run the development server:
+### 1) Prerequisites
+- Node.js 20+
+- npm 10+
+- MetaMask (for influencer wallet connect flows)
+
+### 2) Install dependencies
+
+```bash
+npm install
+```
+
+### 3) Run development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4) Build for production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` — Start dev server
+- `npm run build` — Create production build
+- `npm run start` — Start production server
+- `npm run lint` — Run ESLint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure (high level)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/` — App Router pages and API routes
+- `components/` — UI and visual components
+- `components/forms/` — Form components
+- `context/` — React context (reserved for shared state)
+- `lib/` — Utility/service modules
+- `types/` — Shared TypeScript types
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js shows a deprecation warning for `middleware.ts`; migrate to `proxy.ts` when ready.
+- Wallet and onboarding logic is partly scaffolded; production hardening should include:
+	- persistent DB storage,
+	- input validation on all API routes,
+	- auth/session strategy beyond cookie presence checks.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+This app can be deployed on Vercel or any Node-compatible host.
+
+For Vercel:
+1. Import the repository.
+2. Use default Next.js build settings.
+3. Add required environment variables when backend integrations are enabled.
+
