@@ -25,20 +25,59 @@ export default function LoginForm() {
   /* ------------------------ */
   useEffect(() => {
     if (step === 3 && isConnected && address) {
-      setStep(4);
+      const bindWallet = async () => {
+        try {
+          const resolveRes = await fetch(`/api/auth/resolve?wallet=${encodeURIComponent(address)}`);
+          const resolveData = (await resolveRes.json()) as {
+            success: boolean;
+            hasMultipleRoles?: boolean;
+            roles?: {
+              brand?: unknown;
+              influencer?: unknown;
+            };
+          };
 
-      fetch("/api/wallet/bind", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          company_name: company,
-          wallet_address: address,
-        }),
-      }).then(() => {
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 600);
-      });
+          if (!resolveRes.ok || !resolveData.success) {
+            setError("Unable to validate wallet role.");
+            return;
+          }
+
+          if (resolveData.hasMultipleRoles || resolveData.roles?.influencer) {
+            setError("This wallet is registered as an influencer and cannot be used for brand login.");
+            return;
+          }
+
+          const res = await fetch("/api/wallet/bind", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              company_name: company,
+              wallet_address: address,
+            }),
+          });
+
+          const data = (await res.json()) as {
+            success: boolean;
+            message?: string;
+          };
+
+          if (!res.ok || !data.success) {
+            setError(data.message || "Failed to bind wallet to company.");
+            return;
+          }
+
+          document.cookie = `wallet=${address}; path=/`;
+
+          setStep(4);
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 600);
+        } catch {
+          setError("Failed to bind wallet to company.");
+        }
+      };
+
+      bindWallet();
     }
   }, [isConnected, address, step, company, router]);
 

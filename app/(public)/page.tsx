@@ -1,9 +1,14 @@
 "use client";
 
-import Aurora from "@/components/Aurora";
+import { AuroraHero } from "@/components/aurora-hero-bg";
 import CardNav from "@/components/CardNav";
-import logo from "@/public/logo.svg";
 import Link from "next/link";
+import { Manrope } from "next/font/google";
+
+const headingFont = Manrope({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+});
 
 export default function Home() {
 
@@ -36,12 +41,12 @@ export default function Home() {
   ];
 
   return (
-    <Aurora>
+    <AuroraHero className="bg-black">
 
       {/* NAVBAR */}
       <div className="fixed top-0 left-0 w-full z-50">
         <CardNav
-          logo={logo}
+          logo="/encentive.png"
           logoAlt="Platform Logo"
           items={items}
           baseColor="#ffffff"
@@ -56,10 +61,10 @@ export default function Home() {
       <section className="relative z-10 flex min-h-screen items-center justify-center px-6 text-white text-center top-16">
         <div className="max-w-4xl">
 
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
+          <h1 className={`${headingFont.className} text-5xl md:text-6xl font-extrabold tracking-[-0.03em] leading-[1.05]`}>
             Transparent Campaign Payouts
             <br />
-            <span className="text-neutral-300">
+            <span className="text-neutral-300 font-bold">
               Powered by Blockchain
             </span>
           </h1>
@@ -107,6 +112,6 @@ export default function Home() {
         © {new Date().getFullYear()} Transparent Campaign Platform · Built with Next.js & Web3
       </footer>
 
-    </Aurora>
+    </AuroraHero>
   );
 }

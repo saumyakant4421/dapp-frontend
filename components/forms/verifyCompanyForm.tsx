@@ -1,52 +1,134 @@
 "use client";
 
 import { useState } from "react";
-import { Company } from "@/types/company";
+import type { Company, CompanyCheckResponse, CompanySubmitResponse } from "@/types/company";
+import { isCompanyEmail } from "@/lib/validators";
+
+type StatusTone = "neutral" | "success" | "warning" | "error";
+
+const initialForm: Company = {
+  company_name: "",
+  official_email: "",
+  website: "",
+  linkedin: "",
+  proof_url: "",
+};
 
 export default function VerifyCompanyForm() {
-  const [form, setForm] = useState<Company>({
-    company_name: "",
-    official_email: "",
-    website: "",
-    linkedin: "",
-    proof_url: ""
-  });
+  const [form, setForm] = useState<Company>(initialForm);
 
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [message, setMessage] = useState("");
+  const [tone, setTone] = useState<StatusTone>("neutral");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const checkCompanyStatus = async () => {
+    const companyName = form.company_name.trim();
+
+    if (!companyName) {
+      setTone("error");
+      setMessage("Enter a company name to check verification status.");
+      return;
+    }
+
+    setChecking(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/company/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_name: companyName }),
+      });
+
+      const data = (await res.json()) as CompanyCheckResponse;
+
+      if (!res.ok) {
+        setTone("error");
+        setMessage(data.message || "Unable to check company status.");
+        return;
+      }
+
+      if (data.verified) {
+        setTone("success");
+        setMessage("This company is already verified. You can proceed to login.");
+        return;
+      }
+
+      if (data.pending) {
+        setTone("warning");
+        setMessage("A verification request is already pending for this company.");
+        return;
+      }
+
+      setTone("neutral");
+      setMessage("No verification found. You can submit your details below.");
+    } catch {
+      setTone("error");
+      setMessage("Server error while checking company status.");
+    } finally {
+      setChecking(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isCompanyEmail(form.official_email.trim().toLowerCase())) {
+      setTone("error");
+      setMessage("Use an official company email (no public email providers).");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
-    const res = await fetch("/api/company/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const payload: Company = {
+        company_name: form.company_name.trim(),
+        official_email: form.official_email.trim().toLowerCase(),
+        website: form.website.trim(),
+        linkedin: form.linkedin?.trim() || "",
+        proof_url: form.proof_url?.trim() || "",
+      };
 
-    const data = await res.json();
-
-    if (data.success) {
-      setMessage("Company submitted for verification.");
-      setForm({
-        company_name: "",
-        official_email: "",
-        website: "",
-        linkedin: "",
-        proof_url: ""
+      const res = await fetch("/api/company/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-    } else {
-      setMessage(data.error || "Something went wrong.");
-    }
 
-    setLoading(false);
+      const data = (await res.json()) as CompanySubmitResponse;
+
+      if (res.ok && data.success) {
+        setTone("success");
+        setMessage(data.message || "Company submitted for verification.");
+        setForm(initialForm);
+        return;
+      }
+
+      setTone("error");
+      setMessage(data.message || "Something went wrong.");
+    } catch {
+      setTone("error");
+      setMessage("Server error while submitting verification request.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const toneClass =
+    tone === "success"
+      ? "text-emerald-300"
+      : tone === "warning"
+      ? "text-amber-300"
+      : tone === "error"
+      ? "text-red-300"
+      : "text-neutral-300";
 
   return (
     <form
@@ -66,6 +148,15 @@ export default function VerifyCompanyForm() {
         required
         className="w-full px-3 py-2 text-sm rounded-lg bg-black/40 border border-neutral-700 focus:outline-none focus:border-white/40"
       />
+
+      <button
+        type="button"
+        onClick={checkCompanyStatus}
+        disabled={checking || loading}
+        className="w-full py-2 text-xs bg-neutral-800 rounded-lg font-medium hover:bg-neutral-700 transition disabled:opacity-60"
+      >
+        {checking ? "Checking status..." : "Check company status"}
+      </button>
 
       <input
         type="email"
@@ -107,14 +198,14 @@ export default function VerifyCompanyForm() {
 
       <button
         type="submit"
-        disabled={loading}
-        className="w-full py-2.5 text-sm bg-white text-black rounded-lg font-semibold hover:bg-neutral-200 transition"
+        disabled={loading || checking}
+        className="w-full py-2.5 text-sm bg-white text-black rounded-lg font-semibold hover:bg-neutral-200 transition disabled:opacity-60"
       >
         {loading ? "Submitting..." : "Submit for Verification"}
       </button>
 
       {message && (
-        <p className="text-center text-xs text-neutral-300">
+        <p className={`text-center text-xs ${toneClass}`}>
           {message}
         </p>
       )}

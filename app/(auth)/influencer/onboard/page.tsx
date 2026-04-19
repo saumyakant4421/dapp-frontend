@@ -12,6 +12,7 @@ export default function InfluencerOnboard() {
 
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
+  const [instagramId, setInstagramId] = useState("");
   const [category, setCategory] = useState("fashion");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,9 +23,18 @@ export default function InfluencerOnboard() {
     }
   }, [isConnected, router]);
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
   const handleSubmit = async () => {
 
-    if (!name || !handle) {
+    if (!name || !handle || !instagramId) {
       setError("All fields are required.");
       return;
     }
@@ -42,18 +52,21 @@ export default function InfluencerOnboard() {
           wallet: address,
           name,
           instagram_handle: handle,
+          instagram_id: instagramId,
           category
         })
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to create influencer profile");
+      const data = (await res.json()) as { success?: boolean; message?: string };
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to create influencer profile");
       }
 
       router.push("/influencer/dashboard");
 
     } catch (err) {
-      setError("Could not save profile.");
+      setError(err instanceof Error ? err.message : "Could not save profile.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +75,7 @@ export default function InfluencerOnboard() {
   return (
     <Aurora>
 
-      <div className="min-h-screen flex items-center justify-center px-6 text-white">
+      <div className="h-screen overflow-hidden flex items-center justify-center px-6 text-white">
 
         <div className="max-w-md w-full bg-white/10 backdrop-blur border border-white/10 p-8 rounded-xl space-y-6">
 
@@ -99,6 +112,23 @@ export default function InfluencerOnboard() {
               placeholder="@yourhandle"
               className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 focus:outline-none focus:border-white/40"
             />
+          </div>
+
+          {/* INSTAGRAM ID */}
+          <div>
+            <label className="text-xs text-neutral-400 mb-1 block">
+              Instagram ID
+            </label>
+
+            <input
+              value={instagramId}
+              onChange={(e) => setInstagramId(e.target.value)}
+              placeholder="9876543210123456789"
+              className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 focus:outline-none focus:border-white/40"
+            />
+            <p className="mt-1 text-[11px] text-neutral-500">
+              Enter the long alphanumeric Instagram account ID used for mapping.
+            </p>
           </div>
 
           {/* CATEGORY */}

@@ -5,3 +5,17 @@ export interface Company {
   linkedin?: string;
   proof_url?: string;
 }
+
+export interface CompanyCheckResponse {
+  success: boolean;
+  verified?: boolean;
+  pending?: boolean;
+  exists?: boolean;
+  message?: string;
+}
+
+export interface CompanySubmitResponse {
+  success: boolean;
+  request_id?: string;
+  message?: string;
+}
