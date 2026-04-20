@@ -7,9 +7,11 @@ import {
 } from "@/lib/campaignParticipantsMetadata";
 import { ensureTokenCredentialsStore } from "@/lib/tokenCredentials";
 import { ensureCampaignReelsTable } from "@/lib/campaignReels";
+import { ensureIdentityTables } from "@/lib/identityTables";
 
 export async function POST() {
   try {
+    await ensureIdentityTables();
     await ensureCampaignTimelinesTable();
     await ensureCampaignNotificationsTable();
     await ensureCampaignParticipantsTokenColumns();
@@ -22,6 +24,9 @@ export async function POST() {
       success: true,
       message: "Campaign and token infrastructure is ready.",
       tables: [
+        "company_verification_requests",
+        "wallet_bindings",
+        "influencers",
         "campaign_timelines",
         "campaign_notifications",
         "campaign_participants",

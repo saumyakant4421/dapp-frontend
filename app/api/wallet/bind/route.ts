@@ -1,4 +1,5 @@
 import { clickhouse } from "@/lib/clickhouse";
+import { ensureIdentityTables } from "@/lib/identityTables";
 
 type CountRow = {
   count: number | string;
@@ -19,6 +20,8 @@ type InfluencerWalletRow = {
 // /api/wallet/bind
 export async function POST(req: Request) {
   try {
+    await ensureIdentityTables();
+
     const body = await req.json();
 
     const company_name = body.company_name?.trim().toLowerCase();

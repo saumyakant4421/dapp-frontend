@@ -1,10 +1,13 @@
 import { clickhouse } from "@/lib/clickhouse";
+import { ensureIdentityTables } from "@/lib/identityTables";
 import { isCompanyEmail } from "@/lib/validators";
 import type { Company } from "@/types/company";
 
 // /api/company/submit
 export async function POST(req: Request) {
   try {
+    await ensureIdentityTables();
+
     const body = (await req.json()) as Company;
     const company_name = body.company_name?.trim().toLowerCase();
     const official_email = body.official_email?.trim().toLowerCase();

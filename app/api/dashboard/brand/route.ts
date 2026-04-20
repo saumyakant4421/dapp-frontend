@@ -1,5 +1,4 @@
 import { clickhouse } from "@/lib/clickhouse";
-import { syncCampaignStatuses } from "@/lib/campaignStatus";
 
 type WalletCompanyRow = {
   company_id: string;
@@ -66,13 +65,11 @@ export async function GET(req: Request) {
       );
     }
 
-    await syncCampaignStatuses();
-
     const statsResult = await clickhouse.query({
       query: `
         SELECT
           count() as total_campaigns,
-          countIf(status = 'active') as active_campaigns,
+          countIf(now() >= start_date AND now() < end_date) as active_campaigns,
           toFloat64(sumOrNull(reward_pool)) as total_reward_pool
         FROM campaigns
         WHERE company_id = {companyId:UUID}
@@ -94,7 +91,12 @@ export async function GET(req: Request) {
           campaign_name,
           reward_pool,
           duration_days,
-          status,
+          multiIf(
+            now() <= invitation_deadline, 'inviting',
+            now() >= start_date AND now() < end_date, 'active',
+            now() >= end_date, 'closed',
+            'inviting'
+          ) as status,
           toString(created_at) as created_at
         FROM campaigns
         WHERE company_id = {companyId:UUID}

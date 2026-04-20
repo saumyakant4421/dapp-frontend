@@ -1,6 +1,5 @@
 import { clickhouse } from "@/lib/clickhouse";
 import { ensureCampaignReelsTable } from "@/lib/campaignReels";
-import { syncCampaignStatuses } from "@/lib/campaignStatus";
 
 type CampaignRow = {
   campaign_id: string;
@@ -54,7 +53,6 @@ export async function GET(
       );
     }
 
-    await syncCampaignStatuses();
     await ensureCampaignReelsTable();
 
     const campaignResult = await clickhouse.query({
@@ -65,7 +63,12 @@ export async function GET(
           c.campaign_name as campaign_name,
           c.reward_pool as reward_pool,
           c.duration_days as duration_days,
-          c.status as status,
+          multiIf(
+            now() <= c.invitation_deadline, 'inviting',
+            now() >= c.start_date AND now() < c.end_date, 'active',
+            now() >= c.end_date, 'closed',
+            'inviting'
+          ) as status,
           toString(c.invitation_deadline) as invitation_deadline,
           toString(c.start_date) as start_date,
           toString(c.end_date) as end_date,
@@ -83,7 +86,6 @@ export async function GET(
           c.campaign_name,
           c.reward_pool,
           c.duration_days,
-          c.status,
           c.invitation_deadline,
           c.start_date,
           c.end_date,

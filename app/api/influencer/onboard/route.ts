@@ -1,5 +1,6 @@
 // /api/influencer/onboard
 import { clickhouse } from "@/lib/clickhouse";
+import { ensureIdentityTables } from "@/lib/identityTables";
 
 type ExistingInfluencerRow = {
   influencer_id: string;
@@ -20,6 +21,8 @@ function normalizeInstagramId(raw: string): string {
 
 export async function POST(req: Request) {
   try {
+    await ensureIdentityTables();
+
     const { wallet, name, instagram_handle, instagram_id, category } = await req.json();
 
     const wallet_address = String(wallet || "").trim().toLowerCase();

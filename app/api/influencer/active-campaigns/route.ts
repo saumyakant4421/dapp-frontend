@@ -1,7 +1,6 @@
 import { clickhouse } from "@/lib/clickhouse";
 import { ensureCampaignReelsTable } from "@/lib/campaignReels";
 import { ensureCampaignTimelinesTable } from "@/lib/campaignTimeline";
-import { syncCampaignStatuses } from "@/lib/campaignStatus";
 
 type InfluencerRow = {
   influencer_id: string;
@@ -59,7 +58,6 @@ export async function GET(req: Request) {
 
     await ensureCampaignTimelinesTable();
     await ensureCampaignReelsTable();
-    await syncCampaignStatuses();
 
     const result = await clickhouse.query({
       query: `
@@ -86,7 +84,7 @@ export async function GET(req: Request) {
          AND cr.influencer_id = cp.influencer_id
         WHERE cp.influencer_id = {influencerId:UUID}
           AND cp.status = 'accepted'
-          AND c.status = 'active'
+          AND now() >= c.start_date AND now() < c.end_date
           AND now() >= ct.start_date
           AND now() < ct.start_date + toIntervalDay(c.duration_days)
         ORDER BY ct.start_date DESC

@@ -1,4 +1,5 @@
 import { clickhouse } from "@/lib/clickhouse";
+import { ensureIdentityTables } from "@/lib/identityTables";
 
 type InfluencerRow = {
   influencer_id: string;
@@ -15,6 +16,8 @@ type BrandRow = {
 
 export async function GET(req: Request) {
   try {
+    await ensureIdentityTables();
+
     const wallet = req.url
       ? new URL(req.url).searchParams.get("wallet")?.trim().toLowerCase()
       : null;
