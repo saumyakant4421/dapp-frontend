@@ -435,18 +435,26 @@ export default function InfluencerDashboard() {
                     <div key={campaign.campaign_id} className="rounded-lg border border-white/10 px-3 py-2.5 bg-black/25 space-y-1.5">
                       <div className="flex items-start justify-between gap-2">
                         <p className="text-sm font-medium leading-tight">{campaign.campaign_name}</p>
-                        <button
-                          onClick={() => {
-                            setReelDraftByParticipant((prev) => ({
-                              ...prev,
-                              [campaign.participant_id]: "",
-                            }));
-                            setReelEditorOpenByParticipant((prev) => ({ ...prev, [campaign.participant_id]: true }));
-                          }}
-                          className="shrink-0 rounded-md border border-white/10 bg-white/10 px-2 py-1 text-[10px] text-neutral-200 hover:bg-white/15 transition"
-                        >
-                          {campaign.reel_urls.length > 0 ? "Add Reel" : "Add Reel"}
-                        </button>
+                        <div className="shrink-0 flex items-center gap-1.5">
+                          <Link
+                            href={`/campaigns/${campaign.campaign_id}`}
+                            className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-[10px] text-neutral-200 hover:bg-white/10 transition"
+                          >
+                            View Summary
+                          </Link>
+                          <button
+                            onClick={() => {
+                              setReelDraftByParticipant((prev) => ({
+                                ...prev,
+                                [campaign.participant_id]: "",
+                              }));
+                              setReelEditorOpenByParticipant((prev) => ({ ...prev, [campaign.participant_id]: true }));
+                            }}
+                            className="rounded-md border border-white/10 bg-white/10 px-2 py-1 text-[10px] text-neutral-200 hover:bg-white/15 transition"
+                          >
+                            Add Reel
+                          </button>
+                        </div>
                       </div>
 
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-neutral-500 -mt-0.5">

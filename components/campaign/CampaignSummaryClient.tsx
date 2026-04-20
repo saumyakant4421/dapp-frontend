@@ -47,6 +47,7 @@ type CampaignSummaryResponse = {
     handle_name: string;
     status: string;
     reel_url: string;
+    reel_urls?: string[];
   }>;
 };
 
@@ -243,7 +244,22 @@ export default function CampaignSummaryClient({ campaignId }: { campaignId: stri
                           <div>
                           <p className="text-sm font-medium">@{row.handle_name}</p>
                           <p className="text-[11px] text-neutral-500">Influencer validation record</p>
-                            {row.reel_url ? (
+                            {(row.reel_urls?.length || 0) > 0 ? (
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {(row.reel_urls || []).map((url) => (
+                                  <a
+                                    key={`${row.influencer_id}-${url}`}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex max-w-full items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-neutral-300 hover:text-white truncate"
+                                  >
+                                    <Link2 className="h-3 w-3" />
+                                    {url}
+                                  </a>
+                                ))}
+                              </div>
+                            ) : row.reel_url ? (
                               <a
                                 href={row.reel_url}
                                 target="_blank"
@@ -251,7 +267,7 @@ export default function CampaignSummaryClient({ campaignId }: { campaignId: stri
                                 className="mt-2 inline-flex items-center gap-1 text-xs text-neutral-200 hover:text-white"
                               >
                                 <Link2 className="h-3.5 w-3.5" />
-                                Reel URL
+                                {row.reel_url}
                               </a>
                             ) : (
                               <p className="mt-2 text-xs text-neutral-500">No reel URL submitted.</p>

@@ -36,6 +36,13 @@ type ParticipantRow = {
   reel_url: string;
 };
 
+function splitReelUrls(raw: string): string[] {
+  return raw
+    .split(/\r?\n|\|/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export async function GET(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -151,6 +158,7 @@ export async function GET(
           FROM campaign_participants
           WHERE campaign_id = {campaignId:UUID}
             AND influencer_id = {influencerId:UUID}
+            AND status IN ('invited', 'accepted')
         `,
         query_params: { campaignId: id, influencerId },
       });
@@ -248,6 +256,7 @@ export async function GET(
         handle_name: p.handle_name || "unknown",
         status: p.status,
         reel_url: p.reel_url || "",
+        reel_urls: splitReelUrls(p.reel_url || ""),
       })),
     });
   } catch (error) {

@@ -156,6 +156,7 @@ export async function POST(req: Request) {
 
     // 3) No existing invite/profile found: create fresh influencer profile
     const influencer_id = crypto.randomUUID();
+    const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
 
     await clickhouse.insert({
       table: "influencers",
@@ -167,6 +168,7 @@ export async function POST(req: Request) {
           instagram_handle: handle,
           instagram_id: realInstagramId,
           category: profile_category,
+          created_at,
         },
       ],
       format: "JSONEachRow",

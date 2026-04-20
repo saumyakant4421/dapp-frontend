@@ -54,4 +54,34 @@ export async function ensureIdentityTables() {
       DEFAULT ''
     `,
   });
+
+  await clickhouse.command({
+    query: `
+      ALTER TABLE wallet_bindings
+      ADD COLUMN IF NOT EXISTS created_at DateTime
+      DEFAULT now()
+    `,
+  });
+
+  await clickhouse.command({
+    query: `
+      ALTER TABLE influencers
+      ADD COLUMN IF NOT EXISTS created_at DateTime
+      DEFAULT now()
+    `,
+  });
+
+  await clickhouse.command({
+    query: `
+      ALTER TABLE wallet_bindings
+      MODIFY COLUMN created_at DateTime DEFAULT now()
+    `,
+  });
+
+  await clickhouse.command({
+    query: `
+      ALTER TABLE influencers
+      MODIFY COLUMN created_at DateTime DEFAULT now()
+    `,
+  });
 }

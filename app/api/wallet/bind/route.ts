@@ -127,6 +127,8 @@ export async function POST(req: Request) {
     }
 
     // 4. Insert wallet binding
+    const created_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+
     await clickhouse.insert({
       table: "wallet_bindings",
       values: [
@@ -134,6 +136,7 @@ export async function POST(req: Request) {
           wallet_address,
           entity_type: "brand",
           entity_id: approved_company_id,
+          created_at,
         },
       ],
       format: "JSONEachRow",
