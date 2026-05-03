@@ -180,9 +180,9 @@ export default function CampaignSummaryClient({ campaignId }: { campaignId: stri
                 </div>
 
                 <div className="mt-4 grid gap-2 text-xs text-neutral-300 md:grid-cols-3">
-                  <MetaLine label="Invite deadline" value={data.campaign.invitation_deadline} />
-                  <MetaLine label="Start date" value={data.campaign.start_date} />
-                  <MetaLine label="End date" value={data.campaign.end_date} />
+                  <MetaLine label="Invite deadline" value={`${data.campaign.invitation_deadline} IST`} />
+                  <MetaLine label="Start date" value={`${data.campaign.start_date} IST`} />
+                  <MetaLine label="End date" value={`${data.campaign.end_date} IST`} />
                 </div>
               </div>
 
