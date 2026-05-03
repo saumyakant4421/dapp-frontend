@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import ShapeHero from "@/components/kokonutui/shape-hero";
+import { formatUTCToIST } from "@/lib/dateTimeUtils";
 import {
   BadgeDollarSign,
   CalendarClock,
@@ -180,9 +181,9 @@ export default function CampaignSummaryClient({ campaignId }: { campaignId: stri
                 </div>
 
                 <div className="mt-4 grid gap-2 text-xs text-neutral-300 md:grid-cols-3">
-                  <MetaLine label="Invite deadline" value={`${data.campaign.invitation_deadline} IST`} />
-                  <MetaLine label="Start date" value={`${data.campaign.start_date} IST`} />
-                  <MetaLine label="End date" value={`${data.campaign.end_date} IST`} />
+                  <MetaLine label="Invite deadline" value={formatUTCToIST(data.campaign.invitation_deadline)} />
+                  <MetaLine label="Start date" value={formatUTCToIST(data.campaign.start_date)} />
+                  <MetaLine label="End date" value={formatUTCToIST(data.campaign.end_date)} />
                 </div>
               </div>
 

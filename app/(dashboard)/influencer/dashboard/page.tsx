@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import LineWaves from "@/components/LineWaves";
+import { formatUTCToIST } from "@/lib/dateTimeUtils";
 import { Bell, Clock3, LayoutGrid, Wallet } from "lucide-react";
 
 type Notification = {
@@ -329,7 +330,7 @@ export default function InfluencerDashboard() {
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
                       <span>{inv.campaign_name}</span>
                       <span>{inv.reward_pool.toFixed(2)} GO</span>
-                      <span>Due {inv.invitation_deadline} IST</span>
+                        <span>Due {formatUTCToIST(inv.invitation_deadline)}</span>
                       <span className="capitalize">{inv.participant_status}</span>
                       <Link href={`/campaigns/${inv.campaign_id}`} className="text-neutral-400 hover:text-white underline underline-offset-2">Details</Link>
                     </div>
@@ -460,7 +461,7 @@ export default function InfluencerDashboard() {
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-neutral-500 -mt-0.5">
                         <span>{campaign.reward_pool.toFixed(2)} GO</span>
                         <span>{campaign.duration_days}d</span>
-                        <span>Started {campaign.start_date} IST</span>
+                        <span>Started {formatUTCToIST(campaign.start_date)}</span>
                       </div>
 
                       {campaign.reel_urls.length > 0 ? (

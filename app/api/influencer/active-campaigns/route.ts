@@ -67,10 +67,10 @@ export async function GET(req: Request) {
           c.campaign_name as campaign_name,
           c.reward_pool as reward_pool,
           c.duration_days as duration_days,
-          formatDateTime(ct.start_date, '%F %T', 'Asia/Kolkata') as start_date,
-          formatDateTime(c.invitation_deadline, '%F %T', 'Asia/Kolkata') as invitation_deadline,
-          formatDateTime(c.start_date, '%F %T', 'Asia/Kolkata') as campaign_start_date,
-          formatDateTime(c.end_date, '%F %T', 'Asia/Kolkata') as campaign_end_date,
+          toString(ct.start_date) as start_date,
+          toString(c.invitation_deadline) as invitation_deadline,
+          toString(c.start_date) as campaign_start_date,
+          toString(c.end_date) as campaign_end_date,
           ifNull(cr.reel_url, '') as reel_url
         FROM campaign_participants cp
         INNER JOIN campaigns c ON cp.campaign_id = c.campaign_id
