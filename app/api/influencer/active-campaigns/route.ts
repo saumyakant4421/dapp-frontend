@@ -84,9 +84,7 @@ export async function GET(req: Request) {
          AND cr.influencer_id = cp.influencer_id
         WHERE cp.influencer_id = {influencerId:UUID}
           AND cp.status = 'accepted'
-          AND now() >= c.start_date AND now() < c.end_date
-          AND now() >= ct.start_date
-          AND now() < ct.start_date + toIntervalDay(c.duration_days)
+          AND c.status = 'active'
         ORDER BY ct.start_date DESC
       `,
       query_params: { influencerId: influencer_id },
