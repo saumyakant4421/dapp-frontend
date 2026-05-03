@@ -1,26 +1,26 @@
 import { clickhouse } from "@/lib/clickhouse";
 
-export async function ensureCampaignKeywordsTable() {
+export async function ensureCampaignCommentKeywordsTable() {
   await clickhouse.command({
     query: `
-      CREATE TABLE IF NOT EXISTS campaign_keywords (
+      CREATE TABLE IF NOT EXISTS campaign_comment_keywords (
         id UUID DEFAULT generateUUIDv4(),
-        campaign_id UUID,
+        comment_keywords_ref UUID,
         keyword String
       )
       ENGINE = MergeTree
-      ORDER BY (campaign_id, id)
+      ORDER BY (comment_keywords_ref, id)
     `,
   });
 }
 
 /**
- * Insert keywords for a campaign
- * @param campaignId - Campaign UUID
+ * Insert preferred comment keywords for a campaign
+ * @param commentKeywordsRef - Campaign-level reference UUID
  * @param keywords - Array of keyword strings (1-4 max)
  */
-export async function insertCampaignKeywords(
-  campaignId: string,
+export async function insertCampaignCommentKeywords(
+  commentKeywordsRef: string,
   keywords: string[]
 ): Promise<void> {
   if (!keywords || keywords.length === 0) return;
@@ -32,35 +32,35 @@ export async function insertCampaignKeywords(
 
   if (validKeywords.length === 0) return;
 
-  await ensureCampaignKeywordsTable();
+  await ensureCampaignCommentKeywordsTable();
 
   const values = validKeywords.map((keyword) => ({
-    campaign_id: campaignId,
+    comment_keywords_ref: commentKeywordsRef,
     keyword,
   }));
 
   await clickhouse.insert({
-    table: "campaign_keywords",
+    table: "campaign_comment_keywords",
     values,
     format: "JSONEachRow",
   });
 }
 
 /**
- * Fetch keywords for a campaign
+ * Fetch preferred comment keywords for a campaign
  */
-export async function getCampaignKeywords(campaignId: string): Promise<string[]> {
-  await ensureCampaignKeywordsTable();
+export async function getCampaignCommentKeywords(commentKeywordsRef: string): Promise<string[]> {
+  await ensureCampaignCommentKeywordsTable();
 
   const result = await clickhouse.query({
     query: `
       SELECT keyword
-      FROM campaign_keywords
-      WHERE campaign_id = {campaignId:UUID}
+      FROM campaign_comment_keywords
+      WHERE comment_keywords_ref = {commentKeywordsRef:UUID}
       ORDER BY id ASC
       LIMIT 4
     `,
-    query_params: { campaignId },
+    query_params: { commentKeywordsRef },
   });
 
   const data = await result.json<{ keyword: string }>();

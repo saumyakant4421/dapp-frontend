@@ -4,6 +4,10 @@ import {
   parseCampaignInputAsUTC,
   toClickHouseDateTime,
 } from "@/lib/campaignTimeline";
+import {
+  ensureCampaignCommentKeywordsTable,
+  insertCampaignCommentKeywords,
+} from "@/lib/campaignKeywords";
 
 type WalletBindingRow = {
   company_id: string;
@@ -42,23 +46,8 @@ async function ensureCampaignOnchainColumns() {
   await clickhouse.command({
     query: `
       ALTER TABLE campaigns
-      ADD COLUMN IF NOT EXISTS keywords_ref String
-      DEFAULT ''
-    `,
-  });
-}
-
-async function ensureCampaignCommentKeywordsTable() {
-  await clickhouse.command({
-    query: `
-      CREATE TABLE IF NOT EXISTS campaign_comment_keywords (
-        id UUID DEFAULT generateUUIDv4(),
-        campaign_id UUID,
-        keyword String,
-        created_at DateTime DEFAULT now()
-      ) ENGINE = MergeTree()
-      ORDER BY (campaign_id, id)
-      PARTITION BY toYYYYMM(created_at)
+      ADD COLUMN IF NOT EXISTS comment_keywords_ref UUID
+      DEFAULT generateUUIDv4()
     `,
   });
 }
@@ -229,6 +218,7 @@ export async function POST(req: Request) {
     await ensureCampaignOnchainColumns();
 
     const campaign_id = campaign_id_from_client || crypto.randomUUID();
+    const comment_keywords_ref = crypto.randomUUID();
     const created_at = toClickHouseDateTime(new Date());
     const invitation_deadline_ch = toClickHouseDateTime(invitationDeadlineDate);
     const start_date_ch = toClickHouseDateTime(startDate);
@@ -254,27 +244,16 @@ export async function POST(req: Request) {
           invitation_deadline: invitation_deadline_ch,
           start_date: start_date_ch,
           end_date: end_date_ch,
-          keywords_ref: "",
+          comment_keywords_ref,
         },
       ],
       format: "JSONEachRow",
     });
 
-    // Insert comment keywords if provided
-    if (Array.isArray(comment_keywords) && comment_keywords.length > 0) {
-      await ensureCampaignCommentKeywordsTable();
-      
-      const keywordRecords = comment_keywords.map((kw: string) => ({
-        campaign_id,
-        keyword: String(kw).trim(),
-        created_at: toClickHouseDateTime(new Date()),
-      }));
+    await ensureCampaignCommentKeywordsTable();
 
-      await clickhouse.insert({
-        table: "campaign_comment_keywords",
-        values: keywordRecords,
-        format: "JSONEachRow",
-      });
+    if (Array.isArray(comment_keywords) && comment_keywords.length > 0) {
+      await insertCampaignCommentKeywords(comment_keywords_ref, comment_keywords);
     }
 
     await ensureCampaignTimelinesTable();
