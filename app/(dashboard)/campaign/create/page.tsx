@@ -510,7 +510,7 @@ export default function CreateCampaign() {
 
           <div>
             <label className="text-xs text-neutral-400 mb-1 block">
-              Invitation Deadline
+              Invitation Deadline (IST)
             </label>
 
             <input
@@ -523,7 +523,7 @@ export default function CreateCampaign() {
 
           <div>
             <label className="text-xs text-neutral-400 mb-1 block">
-              Start Date
+              Start Date (IST)
             </label>
 
             <input

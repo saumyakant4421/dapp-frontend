@@ -1,5 +1,9 @@
 import { clickhouse } from "@/lib/clickhouse";
-import { ensureCampaignTimelinesTable, toClickHouseDateTime } from "@/lib/campaignTimeline";
+import {
+  ensureCampaignTimelinesTable,
+  parseCampaignInputAsUTC,
+  toClickHouseDateTime,
+} from "@/lib/campaignTimeline";
 
 type WalletBindingRow = {
   company_id: string;
@@ -97,8 +101,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const invitationDeadlineDate = new Date(String(invitation_deadline));
-    const startDate = new Date(String(start_date));
+    let invitationDeadlineDate: Date;
+    let startDate: Date;
+
+    try {
+      invitationDeadlineDate = parseCampaignInputAsUTC(String(invitation_deadline));
+      startDate = parseCampaignInputAsUTC(String(start_date));
+    } catch {
+      return Response.json(
+        { success: false, message: "Invalid invitation deadline or start date." },
+        { status: 400 }
+      );
+    }
 
     if (Number.isNaN(invitationDeadlineDate.getTime()) || Number.isNaN(startDate.getTime())) {
       return Response.json(
@@ -208,7 +222,7 @@ export async function POST(req: Request) {
           target_gender,
           target_age_group,
           moderation_k,
-          status: "inviting",
+          status: "INVITING",
           onchain_tx_hash: String(tx_hash || ""),
           onchain_reward_eth: Number(reward_eth ?? reward_pool ?? 0),
           onchain_contract_address: String(contract_address || ""),

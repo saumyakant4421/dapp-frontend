@@ -85,7 +85,8 @@ export async function POST(req: Request) {
         WHERE cp.id = {participantId:UUID}
           AND cp.influencer_id = {influencerId:UUID}
           AND cp.status = 'accepted'
-          AND c.status = 'ACTIVE'
+          AND now('UTC') >= c.start_date
+          AND now('UTC') < c.end_date
           AND toString(cp.campaign_id) != '\\N'
         LIMIT 1
       `,

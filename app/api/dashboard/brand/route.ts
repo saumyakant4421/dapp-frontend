@@ -69,7 +69,7 @@ export async function GET(req: Request) {
       query: `
         SELECT
           count() as total_campaigns,
-          countIf(now() >= start_date AND now() < end_date) as active_campaigns,
+          countIf(now('UTC') >= start_date AND now('UTC') < end_date) as active_campaigns,
           toFloat64(sumOrNull(reward_pool)) as total_reward_pool
         FROM campaigns
         WHERE company_id = {companyId:UUID}
@@ -92,9 +92,9 @@ export async function GET(req: Request) {
           reward_pool,
           duration_days,
           multiIf(
-            now() <= invitation_deadline, 'inviting',
-            now() >= start_date AND now() < end_date, 'active',
-            now() >= end_date, 'closed',
+            now('UTC') <= invitation_deadline, 'inviting',
+            now('UTC') >= start_date AND now('UTC') < end_date, 'active',
+            now('UTC') >= end_date, 'closed',
             'inviting'
           ) as status,
           toString(created_at) as created_at

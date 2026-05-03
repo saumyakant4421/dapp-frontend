@@ -73,7 +73,7 @@ export async function GET(req: Request) {
         LEFT JOIN accepted_counts ac ON c.campaign_id = ac.campaign_id
         WHERE cp.influencer_id = {influencerId:UUID}
           AND cp.status = 'accepted'
-          AND now() >= c.end_date
+          AND now('UTC') >= c.end_date
         ORDER BY c.end_date DESC
         LIMIT 50
       `,

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PixelBlast from "@/components/PixelBlast";
+import { formatUTCToIST } from "@/lib/dateTimeUtils";
 
 type DashboardCampaign = {
   campaign_id: string;
@@ -214,6 +215,9 @@ export default function Dashboard() {
                         <p className="text-sm font-medium">{campaign.campaign_name}</p>
                         <p className="text-xs text-neutral-400">
                           {campaign.duration_days} days • {campaign.participants} participants
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          Created {formatUTCToIST(campaign.created_at)}
                         </p>
                       </div>
                       <div className="text-right">

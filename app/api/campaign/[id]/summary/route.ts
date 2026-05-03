@@ -71,9 +71,9 @@ export async function GET(
           c.reward_pool as reward_pool,
           c.duration_days as duration_days,
           multiIf(
-            now() <= c.invitation_deadline, 'inviting',
-            now() >= c.start_date AND now() < c.end_date, 'active',
-            now() >= c.end_date, 'closed',
+            now('UTC') <= c.invitation_deadline, 'inviting',
+            now('UTC') >= c.start_date AND now('UTC') < c.end_date, 'active',
+            now('UTC') >= c.end_date, 'closed',
             'inviting'
           ) as status,
           toString(c.invitation_deadline) as invitation_deadline,
