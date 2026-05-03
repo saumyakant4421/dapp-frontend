@@ -38,6 +38,29 @@ async function ensureCampaignOnchainColumns() {
       DEFAULT ''
     `,
   });
+
+  await clickhouse.command({
+    query: `
+      ALTER TABLE campaigns
+      ADD COLUMN IF NOT EXISTS keywords_ref String
+      DEFAULT ''
+    `,
+  });
+}
+
+async function ensureCampaignCommentKeywordsTable() {
+  await clickhouse.command({
+    query: `
+      CREATE TABLE IF NOT EXISTS campaign_comment_keywords (
+        id UUID DEFAULT generateUUIDv4(),
+        campaign_id UUID,
+        keyword String,
+        created_at DateTime DEFAULT now()
+      ) ENGINE = MergeTree()
+      ORDER BY (campaign_id, id)
+      PARTITION BY toYYYYMM(created_at)
+    `,
+  });
 }
 
 // /api/campaign/create
@@ -59,6 +82,7 @@ export async function POST(req: Request) {
       tx_hash,
       reward_eth,
       contract_address,
+      comment_keywords,
     } = body;
 
     const isOnchainHandoffOnly =
@@ -230,10 +254,28 @@ export async function POST(req: Request) {
           invitation_deadline: invitation_deadline_ch,
           start_date: start_date_ch,
           end_date: end_date_ch,
+          keywords_ref: "",
         },
       ],
       format: "JSONEachRow",
     });
+
+    // Insert comment keywords if provided
+    if (Array.isArray(comment_keywords) && comment_keywords.length > 0) {
+      await ensureCampaignCommentKeywordsTable();
+      
+      const keywordRecords = comment_keywords.map((kw: string) => ({
+        campaign_id,
+        keyword: String(kw).trim(),
+        created_at: toClickHouseDateTime(new Date()),
+      }));
+
+      await clickhouse.insert({
+        table: "campaign_comment_keywords",
+        values: keywordRecords,
+        format: "JSONEachRow",
+      });
+    }
 
     await ensureCampaignTimelinesTable();
 

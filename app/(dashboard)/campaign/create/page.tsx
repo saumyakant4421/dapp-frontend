@@ -34,6 +34,10 @@ export default function CreateCampaign() {
   const [moderation, setModeration] = useState(0.5);
   const [gender, setGender] = useState("");
   const [ageCategory, setAgeCategory] = useState("");
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywordInput, setKeywordInput] = useState("");
+  const [commentKeywords, setCommentKeywords] = useState<string[]>([]);
+  const [commentKeywordInput, setCommentKeywordInput] = useState("");
 
   const [registeredInfluencers, setRegisteredInfluencers] = useState<Influencer[]>([]);
   const [selectedInfluencerIds, setSelectedInfluencerIds] = useState<string[]>([]);
@@ -206,6 +210,44 @@ export default function CreateCampaign() {
     });
   };
 
+  const addKeyword = () => {
+    const trimmed = keywordInput.trim();
+    if (trimmed && keywords.length < 4 && !keywords.includes(trimmed)) {
+      setKeywords([...keywords, trimmed]);
+      setKeywordInput("");
+    }
+  };
+
+  const removeKeyword = (keyword: string) => {
+    setKeywords(keywords.filter((k) => k !== keyword));
+  };
+
+  const handleKeywordKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addKeyword();
+    }
+  };
+
+  const addCommentKeyword = () => {
+    const trimmed = commentKeywordInput.trim();
+    if (trimmed && commentKeywords.length < 4 && !commentKeywords.includes(trimmed)) {
+      setCommentKeywords([...commentKeywords, trimmed]);
+      setCommentKeywordInput("");
+    }
+  };
+
+  const removeCommentKeyword = (keyword: string) => {
+    setCommentKeywords(commentKeywords.filter((k) => k !== keyword));
+  };
+
+  const handleCommentKeywordKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCommentKeyword();
+    }
+  };
+
   const submitCampaign = async () => {
     try {
       setLoading(true);
@@ -303,6 +345,8 @@ export default function CreateCampaign() {
         ...(gender ? { target_gender: gender } : {}),
         ...(ageCategory ? { target_age_group: ageCategory } : {}),
         moderation_k: moderation,
+        ...(keywords.length > 0 ? { keywords } : {}),
+        ...(commentKeywords.length > 0 ? { comment_keywords: commentKeywords } : {}),
       };
 
       const res = await fetch("/api/campaign/create", {
@@ -597,6 +641,98 @@ export default function CreateCampaign() {
                 onChange={(e) => setModeration(parseFloat(e.target.value))}
                 className="w-full accent-white cursor-pointer"
               />
+            </div>
+
+            <div>
+              <label className="text-xs text-neutral-400 mb-1 block">
+                Preferred Keywords (1-4)
+              </label>
+
+              <div className="space-y-2">
+                {keywords.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {keywords.map((keyword) => (
+                      <button
+                        key={keyword}
+                        onClick={() => removeKeyword(keyword)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 text-xs text-white hover:bg-white/30 transition"
+                      >
+                        {keyword}
+                        <span className="font-semibold">×</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex gap-1">
+                  <input
+                    type="text"
+                    value={keywordInput}
+                    onChange={(e) => setKeywordInput(e.target.value)}
+                    onKeyDown={handleKeywordKeyDown}
+                    placeholder="e.g., sustainable"
+                    disabled={keywords.length >= 4}
+                    className="flex-1 px-3 py-2 text-xs rounded-lg bg-black/40 border border-neutral-700 focus:outline-none focus:border-white/40 disabled:opacity-50"
+                  />
+                  <button
+                    onClick={addKeyword}
+                    disabled={keywords.length >= 4 || !keywordInput.trim()}
+                    className="px-3 py-2 text-xs bg-white/10 text-white rounded-lg hover:bg-white/20 transition disabled:opacity-50"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <p className="text-[10px] text-neutral-500">
+                  {keywords.length}/4 keywords added
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-neutral-400 mb-1 block">
+                Preferred Keywords for Comments (Optional) <span className="text-[10px] text-neutral-500">1-4 with $ multiplier</span>
+              </label>
+
+              <div className="space-y-2">
+                {commentKeywords.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {commentKeywords.map((keyword) => (
+                      <button
+                        key={keyword}
+                        onClick={() => removeCommentKeyword(keyword)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/30 px-2.5 py-1 text-xs text-emerald-200 hover:bg-emerald-500/40 transition border border-emerald-500/50"
+                      >
+                        $ {keyword}
+                        <span className="font-semibold">×</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex gap-1">
+                  <input
+                    type="text"
+                    value={commentKeywordInput}
+                    onChange={(e) => setCommentKeywordInput(e.target.value)}
+                    onKeyDown={handleCommentKeywordKeyDown}
+                    placeholder="e.g., authentic, trending"
+                    disabled={commentKeywords.length >= 4}
+                    className="flex-1 px-3 py-2 text-xs rounded-lg bg-black/40 border border-neutral-700 focus:outline-none focus:border-white/40 disabled:opacity-50"
+                  />
+                  <button
+                    onClick={addCommentKeyword}
+                    disabled={commentKeywords.length >= 4 || !commentKeywordInput.trim()}
+                    className="px-3 py-2 text-xs bg-emerald-600/20 text-emerald-300 rounded-lg hover:bg-emerald-600/30 transition disabled:opacity-50 border border-emerald-600/30"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <p className="text-[10px] text-neutral-500">
+                  {commentKeywords.length}/4 comment keywords added (boosts comment score if used in influencer replies)
+                </p>
+              </div>
             </div>
 
           </div>
