@@ -85,10 +85,8 @@ export async function POST(req: Request) {
         WHERE cp.id = {participantId:UUID}
           AND cp.influencer_id = {influencerId:UUID}
           AND cp.status = 'accepted'
-          AND now() >= c.start_date AND now() < c.end_date
+          AND c.status = 'ACTIVE'
           AND toString(cp.campaign_id) != '\\N'
-          AND now() >= ct.start_date
-          AND now() < ct.start_date + toIntervalDay(c.duration_days)
         LIMIT 1
       `,
       query_params: { participantId, influencerId },

@@ -67,7 +67,10 @@ export async function GET(req: Request) {
           c.campaign_name as campaign_name,
           c.reward_pool as reward_pool,
           c.duration_days as duration_days,
-          toString(ct.start_date) as start_date,
+          formatDateTime(ct.start_date, '%F %T', 'Asia/Kolkata') as start_date,
+          formatDateTime(c.invitation_deadline, '%F %T', 'Asia/Kolkata') as invitation_deadline,
+          formatDateTime(c.start_date, '%F %T', 'Asia/Kolkata') as campaign_start_date,
+          formatDateTime(c.end_date, '%F %T', 'Asia/Kolkata') as campaign_end_date,
           ifNull(cr.reel_url, '') as reel_url
         FROM campaign_participants cp
         INNER JOIN campaigns c ON cp.campaign_id = c.campaign_id
@@ -84,7 +87,7 @@ export async function GET(req: Request) {
          AND cr.influencer_id = cp.influencer_id
         WHERE cp.influencer_id = {influencerId:UUID}
           AND cp.status = 'accepted'
-          AND c.status = 'active'
+          AND c.status = 'ACTIVE'
         ORDER BY ct.start_date DESC
       `,
       query_params: { influencerId: influencer_id },
