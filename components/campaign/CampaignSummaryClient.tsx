@@ -122,6 +122,8 @@ export default function CampaignSummaryClient({ campaignId }: { campaignId: stri
       ? "/dashboard"
       : "/";
 
+  const reportHref = `/campaigns/${campaignId}/report`;
+
   const backLabel =
     data?.role === "influencer"
       ? "Back to influencer dashboard"
@@ -142,9 +144,19 @@ export default function CampaignSummaryClient({ campaignId }: { campaignId: stri
             <p className="text-[11px] uppercase tracking-[0.35em] text-neutral-500">Campaign summary</p>
             <h1 className="text-2xl font-semibold mt-2">Campaign Overview</h1>
           </div>
-          <Link href={dashboardHref} className="inline-flex items-center gap-2 text-sm text-neutral-300 hover:text-white">
-            {backLabel} <ChevronRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            {data?.campaign?.status === "closed" ? (
+              <Link
+                href={reportHref}
+                className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15 transition"
+              >
+                View report <ChevronRight className="h-4 w-4" />
+              </Link>
+            ) : null}
+            <Link href={dashboardHref} className="inline-flex items-center gap-2 text-sm text-neutral-300 hover:text-white">
+              {backLabel} <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         {loading ? (
