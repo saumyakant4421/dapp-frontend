@@ -44,7 +44,7 @@ export type CampaignReportInfluencer = {
   instagram_handle: string;
   status: string;
   reels_involved: number;
-  fico_score: number;
+  ipi_score: number;
   rewards_earned: number;
   wallet_address: string;
   reel_urls: string[];
@@ -315,7 +315,7 @@ export async function loadCampaignReport(campaignId: string, wallet: string): Pr
             greatest(ifNull(si_uuid.final_index, 0), ifNull(si_ig.final_index, 0)) > 0,
             greatest(ifNull(si_uuid.final_index, 0), ifNull(si_ig.final_index, 0)),
             300
-          ) as fico_score,
+          ) as ipi_score,
           ifNull(pd.total_payout, 0) as amount_in_go
         FROM campaign_participants cp
         LEFT JOIN influencers i
@@ -360,7 +360,7 @@ export async function loadCampaignReport(campaignId: string, wallet: string): Pr
       query_params: { campaignId },
     });
 
-    const performanceData = await performanceResult.json<PerformanceRow & { wallet_address: string; fico_score: number; amount_in_go: number }>();
+    const performanceData = await performanceResult.json<PerformanceRow & { wallet_address: string; ipi_score: number; amount_in_go: number }>();
     const acceptedCount = Number(stats.accepted_count ?? 0);
     const totalRewardDistributed = Number(campaign.reward_pool ?? 0);
     const rewardPerAcceptedInfluencer = acceptedCount > 0 ? totalRewardDistributed / acceptedCount : 0;
@@ -376,14 +376,14 @@ export async function loadCampaignReport(campaignId: string, wallet: string): Pr
       wallet_address: row.wallet_address || "",
       status: row.status,
       reels_involved: Number(row.reel_count ?? 0),
-      fico_score: Number(row.fico_score ?? 300),
+      ipi_score: Number(row.ipi_score ?? 300),
       rewards_earned: row.status === "accepted" ? Number(row.amount_in_go ?? 0) || Number(rewardPerAcceptedInfluencer.toFixed(4)) : 0,
       reel_urls: splitReelUrls(row.reel_urls || ""),
       top_performer: false,
     }));
 
-    const topInfluencerFico = influencers.reduce((max, row) => Math.max(max, row.fico_score), 0);
-    const topInfluencerIndex = influencers.findIndex((row) => row.fico_score === topInfluencerFico);
+    const topInfluencerIpi = influencers.reduce((max, row) => Math.max(max, row.ipi_score), 0);
+    const topInfluencerIndex = influencers.findIndex((row) => row.ipi_score === topInfluencerIpi);
 
     const normalizedInfluencers = influencers.map((row, index) => ({
       ...row,

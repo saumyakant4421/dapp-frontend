@@ -46,7 +46,7 @@ type CampaignReportResponse = {
       instagram_handle: string;
       status: string;
       reels_involved: number;
-      fico_score: number;
+      ipi_score: number;
       rewards_earned: number;
       wallet_address: string;
       reel_urls: string[];
@@ -126,12 +126,12 @@ export default function CampaignReportClient({ campaignId }: { campaignId: strin
     if (!report) return;
 
     const rows = [
-      ["Influencer Name", "Handle", "Reels Involved", "FICO Score", "Rewards Earned (GO)", "Wallet", "Top Performer"],
+      ["Influencer Name", "Handle", "Reels Involved", "IPI Score", "Rewards Earned (GO)", "Wallet", "Top Performer"],
       ...report.influencers.map((row) => [
         row.influencer_name,
         row.instagram_handle,
         String(row.reels_involved),
-        String(row.fico_score),
+        String(row.ipi_score),
         `${row.rewards_earned.toFixed(2)} GO`,
         row.wallet_address,
         row.top_performer ? "Yes" : "No",
@@ -327,8 +327,8 @@ export default function CampaignReportClient({ campaignId }: { campaignId: strin
                           <p className="font-bold text-gray-900">{row.rewards_earned.toFixed(2)} GO</p>
                         </div>
                         <div className="bg-white border border-gray-200 rounded p-1.5">
-                          <span className="text-gray-600 font-semibold">FICO</span>
-                          <p className="font-bold text-gray-900">{row.fico_score}</p>
+                          <span className="text-gray-600 font-semibold">IPI</span>
+                          <p className="font-bold text-gray-900">{row.ipi_score}</p>
                         </div>
                         <div className="bg-white border border-gray-200 rounded p-1.5">
                           <span className="text-gray-600 font-semibold">Links</span>
